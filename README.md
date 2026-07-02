@@ -4,10 +4,16 @@ This project is a starting point for testing a website and its API, using a tool
 
 Right now it points at two example, placeholder targets: `playwright.dev` (a real website, used for the UI tests) and `jsonplaceholder.typicode.com` (a free test API, used for the API tests). Once you have a real app to test, you just change two settings (`UI_BASE_URL` and `API_BASE_URL` in `.env`) and everything points at your app instead.
 
+**Contents:** [What you need](#what-you-need-before-you-start) · [Getting started](#getting-started) · [Project layout](#how-the-project-is-laid-out) · [How tests are organized](#how-tests-are-organized) · [Running tests](#running-tests) · [Other commands](#other-useful-commands) · [Docs](#where-to-read-more) · [Troubleshooting](#troubleshooting)
+
+---
+
 ## What you need before you start
 
 - Node.js, version `20.19.0` or newer (also works with `22.13.0+` or `24+`). This is required by our code-quality tooling. The exact version is written in `package.json` under `"engines"`.
 - npm, version `10` or newer. npm comes bundled with Node.js, so if you have Node you almost certainly already have this.
+
+---
 
 ## Getting started
 
@@ -28,6 +34,8 @@ npm run report    # opens a report of the last test run in your browser
 ```
 
 If the browser download in step 2 fails, jump to [Troubleshooting](#troubleshooting) below.
+
+---
 
 ## How the project is laid out
 
@@ -65,6 +73,10 @@ If the browser download in step 2 fails, jump to [Troubleshooting](#troubleshoot
 
 Don't worry about memorizing all of this. The short version: reusable code lives in `src/`, and the actual tests live in `tests/`, sorted into folders by what kind of test they are.
 
+> **Want a picture of how these pieces connect, not just a file list?** [docs/architecture.md](./docs/architecture.md#the-big-picture) has diagrams showing how a test gets what it needs from `src/`.
+
+---
+
 ## How tests are organized
 
 Tests are grouped by **the kind of check they do**, not by which feature they belong to. There's more on why in [docs/architecture.md](./docs/architecture.md#why-tests-are-grouped-by-type-not-by-feature). Each folder lines up with one command and one tag:
@@ -79,6 +91,8 @@ Tests are grouped by **the kind of check they do**, not by which feature they be
 | `tests/mocking/` | `@mocking` | `npm run test:mocking` |
 
 Adding a new test? The full how-to is in [docs/writing-tests.md](./docs/writing-tests.md) and [CONTRIBUTING.md](./CONTRIBUTING.md). There's also an AI skill (`.claude/skills/add-test`) that can scaffold one for you.
+
+---
 
 ## Running tests
 
@@ -96,6 +110,8 @@ Adding a new test? The full how-to is in [docs/writing-tests.md](./docs/writing-
 | `npm run test:mocking` | Runs only the network-mocking tests |
 | `npm run report` | Opens the report from the last test run |
 
+---
+
 ## Other useful commands
 
 - `npm run lint` / `npm run lint:fix` — checks the code for common mistakes (and fixes what it can automatically)
@@ -103,23 +119,31 @@ Adding a new test? The full how-to is in [docs/writing-tests.md](./docs/writing-
 - `npm run typecheck` — checks that the TypeScript code is valid, without actually running anything
 - `npm run audit` — checks whether any of our dependencies have known security problems
 
+---
+
 ## Where to read more
 
 | Doc | What's in it |
 |---|---|
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | How to add a new page, API client, test, or AI skill, and what to check before opening a pull request |
-| [docs/architecture.md](./docs/architecture.md) | Why the project is structured the way it is |
+| [docs/architecture.md](./docs/architecture.md) | Why the project is structured the way it is, with diagrams |
 | [docs/writing-tests.md](./docs/writing-tests.md) | How to find things on a page, tag tests, and write visual/accessibility/mocking tests |
 | [docs/environments.md](./docs/environments.md) | How settings work, and how to point tests at a different environment |
 | [docs/security.md](./docs/security.md) | Rules for keeping secrets and personal data out of the repo |
 | [docs/claude-skills.md](./docs/claude-skills.md) | What the `.claude/skills/` folder is and how to add a new AI skill |
 
+---
+
 ## Troubleshooting
 
-**`npx playwright install` fails, with an error like `ENOTFOUND cdn.playwright.dev`, or it times out.** This means your network can't reach the site Playwright downloads browsers from — common on restricted networks, sandboxes, or behind certain proxies. Try again from a network with normal internet access. Note that `npm install` itself doesn't need this connection, only this one extra step does.
+**`npx playwright install` fails, with an error like `ENOTFOUND cdn.playwright.dev`, or it times out.**
+This means your network can't reach the site Playwright downloads browsers from — common on restricted networks, sandboxes, or behind certain proxies. Try again from a network with normal internet access. Note that `npm install` itself doesn't need this connection, only this one extra step does.
 
-**`npm install` prints a warning that says `EBADENGINE`.** This means your installed Node.js version is older than what our tools expect (see [What you need before you start](#what-you-need-before-you-start)). It's just a warning, not a failure — things will still mostly work, but it's worth upgrading Node if you want the warning to go away.
+**`npm install` prints a warning that says `EBADENGINE`.**
+This means your installed Node.js version is older than what our tools expect (see [What you need before you start](#what-you-need-before-you-start)). It's just a warning, not a failure — things will still mostly work, but it's worth upgrading Node if you want the warning to go away.
 
-**A visual test fails the first time you run it, saying something like "no baseline found."** This is expected. A "baseline" is the saved reference screenshot a visual test compares against, and none exists yet for a brand new test. Run `npm run test:visual:update` once, look at the image it creates to make sure it's correct, and commit it.
+**A visual test fails the first time you run it, saying something like "no baseline found."**
+This is expected. A "baseline" is the saved reference screenshot a visual test compares against, and none exists yet for a brand new test. Run `npm run test:visual:update` once, look at the image it creates to make sure it's correct, and commit it.
 
-**You see an error like `First argument must use the object destructuring pattern`.** This is a Playwright-specific quirk: it reads your fixture function's first argument directly from the code, so it must be written as `{ page }` or `{}`, even if you don't use it. Look at `src/fixtures/index.ts` for an example of how we handle this.
+**You see an error like `First argument must use the object destructuring pattern`.**
+This is a Playwright-specific quirk: it reads your fixture function's first argument directly from the code, so it must be written as `{ page }` or `{}`, even if you don't use it. Look at `src/fixtures/index.ts` for an example of how we handle this.

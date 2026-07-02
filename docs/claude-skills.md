@@ -2,6 +2,10 @@
 
 This project uses Claude Code, an AI coding assistant, to help build and maintain it. `.claude/skills/` is where we keep step-by-step instructions that tell the AI exactly how we like new code written here, so it doesn't have to guess.
 
+**In this doc:** [What's here today](#whats-in-this-folder-today) · [Skill file format](#what-a-skill-file-looks-like) · [When to add one](#when-to-add-a-new-skill) · [When not to](#when-not-to-add-a-skill) · [.mcp.json](#mcpjson)
+
+---
+
 ## What's in this folder today
 
 ```
@@ -12,6 +16,8 @@ This project uses Claude Code, an AI coding assistant, to help build and maintai
 ```
 
 These match the same three things explained in `CONTRIBUTING.md`. Think of `CONTRIBUTING.md` as the version a person reads, and these skill files as the version the AI follows. If our conventions change, update both.
+
+---
 
 ## What a skill file looks like
 
@@ -34,6 +40,8 @@ A few tips:
 - The `description` should be specific. "Scaffold a new Page Object" is more useful than "helps with pages," because it's easier to match to the right task.
 - Point to a real, existing file as an example wherever you can (for example, "look at `src/pages/home.page.ts`"). Steps that only describe a pattern in the abstract tend to go out of date faster than steps that point at real, working code.
 
+---
+
 ## When to add a new skill
 
 Add one when you notice you're explaining the same steps more than once, or when a new pattern needs to be followed consistently by everyone (including the AI) going forward.
@@ -44,11 +52,15 @@ Add one when you notice you're explaining the same steps more than once, or when
 4. Add a link to it from `CONTRIBUTING.md`, and from the table in `README.md` if it's a common enough task.
 5. Try it out yourself before trusting it — run it and check the result looks like what you'd have written by hand.
 
+---
+
 ## When not to add a skill
 
 - For something you'll only ever do once. It's not worth writing down.
 - For something that's really just "go read this doc." Link to the doc instead — a skill should help you *build* something, not just repeat information that already exists elsewhere.
 - For a pattern that's still changing. Get it right in the code first, with a real example or two, then write the skill once it's settled.
+
+---
 
 ## `.mcp.json`
 
