@@ -1,6 +1,6 @@
 # Writing Tests
 
-Want to know how to write a test the right way in this project? Start here. For a map of which folder holds which kind of test, see the [Project structure section in the README](../README.md#project-structure).
+Want to know how to write a test the right way in this project? Start here. For a map of which folder holds which kind of test, see [How the project is laid out in the README](../README.md#how-the-project-is-laid-out).
 
 ## How to find things on the page (locators)
 

@@ -1,67 +1,73 @@
 # Playwright + TypeScript Test Framework
 
-A starter scaffold covering UI, API, visual regression, accessibility, and network-mocking tests. Example tests run against placeholder targets (playwright.dev, jsonplaceholder.typicode.com) — swap `UI_BASE_URL`/`API_BASE_URL` in `.env` to point at a real app.
+This project is a starting point for testing a website and its API, using a tool called Playwright, written in TypeScript.
 
-## Prerequisites
+Right now it points at two example, placeholder targets: `playwright.dev` (a real website, used for the UI tests) and `jsonplaceholder.typicode.com` (a free test API, used for the API tests). Once you have a real app to test, you just change two settings (`UI_BASE_URL` and `API_BASE_URL` in `.env`) and everything points at your app instead.
 
-- Node.js `>=20.19.0` (or `>=22.13.0`/`>=24`) — required by the ESLint toolchain; see `engines` in `package.json`
-- npm `>=10`
+## What you need before you start
+
+- Node.js, version `20.19.0` or newer (also works with `22.13.0+` or `24+`). This is required by our code-quality tooling. The exact version is written in `package.json` under `"engines"`.
+- npm, version `10` or newer. npm comes bundled with Node.js, so if you have Node you almost certainly already have this.
 
 ## Getting started
 
-```bash
-npm install
-npx playwright install --with-deps   # downloads browser binaries (~few hundred MB)
-cp .env.example .env
-npm test
-```
-
-Then explore:
+Run these commands in order, from the project folder:
 
 ```bash
-npm run test:ui        # interactive UI mode — best way to explore the suite
-npm run report          # view the last HTML report
+npm install                          # installs all the packages this project depends on
+npx playwright install --with-deps   # downloads the actual browsers Playwright will control (a few hundred MB)
+cp .env.example .env                 # creates your local settings file from the example
+npm test                             # runs the full test suite
 ```
 
-If `npx playwright install` fails to download browsers (e.g. restricted network/proxy/sandbox), see [Troubleshooting](#troubleshooting) below.
+Once that's working, these are worth trying next:
 
-## Project structure
+```bash
+npm run test:ui   # opens an interactive window where you can watch and step through tests
+npm run report    # opens a report of the last test run in your browser
+```
+
+If the browser download in step 2 fails, jump to [Troubleshooting](#troubleshooting) below.
+
+## How the project is laid out
 
 ```
 ├── .claude/
-│   └── skills/                # Claude Code skills — see docs/claude-skills.md
+│   └── skills/                # AI helper instructions — see docs/claude-skills.md
 │       ├── add-page-object/
 │       ├── add-api-client/
 │       └── add-test/
-├── .mcp.json                  # Playwright MCP server registration (AI-driven browser exploration)
+├── .mcp.json                  # lets an AI agent control a real browser while writing tests
 ├── src/
-│   ├── pages/                 # Page Object Models — locators + actions only, no assertions
-│   ├── components/            # Reusable UI fragments shared across pages
-│   ├── api/                   # API clients, one per resource
-│   ├── fixtures/              # test.extend() wiring; merged TestFixtures type
-│   ├── data/                  # Synthetic test data factories (faker-based)
-│   ├── config/                # Validated, typed environment config
-│   └── utils/                 # Generic test helpers
+│   ├── pages/                 # one file per web page: how to find and use things on it
+│   ├── components/            # reusable pieces shared across pages (like a nav bar)
+│   ├── api/                   # one file per API area, wrapping the actual HTTP calls
+│   ├── fixtures/              # wires everything above into the tests automatically
+│   ├── data/                  # generates fake test data (names, emails, etc.)
+│   ├── config/                # reads and checks the settings in .env
+│   └── utils/                 # small shared helper functions
 ├── tests/
 │   ├── ui/
-│   │   ├── smoke/              # @smoke — fast, critical-path checks
-│   │   └── regression/         # @regression — broader coverage
-│   ├── api/                    # @api — no browser, hits the API directly
-│   ├── visual/                 # @visual — screenshot baseline comparisons
-│   ├── a11y/                   # @a11y — axe-core WCAG violation checks
-│   └── mocking/                # @mocking — page.route() interception examples
-├── docs/                      # Reference docs — see table below
-├── .env.example
-├── playwright.config.ts
-├── tsconfig.json
-├── package.json
-├── README.md                  # you are here
-└── CONTRIBUTING.md
+│   │   ├── smoke/              # quick checks that the basics still work (tag: @smoke)
+│   │   └── regression/         # deeper checks (tag: @regression)
+│   ├── api/                    # tests that call the API directly, no browser needed (tag: @api)
+│   ├── visual/                 # tests that compare screenshots (tag: @visual)
+│   ├── a11y/                   # accessibility checks (tag: @a11y)
+│   └── mocking/                # tests using faked network responses (tag: @mocking)
+├── docs/                      # deeper explanations — see the table further down
+├── .env.example                # template for your local settings file
+├── playwright.config.ts        # main Playwright settings
+├── tsconfig.json                # TypeScript settings
+├── package.json                 # project info, dependencies, and commands
+├── README.md                    # you are here
+└── CONTRIBUTING.md              # how to add new tests, pages, and API clients
 ```
+
+Don't worry about memorizing all of this. The short version: reusable code lives in `src/`, and the actual tests live in `tests/`, sorted into folders by what kind of test they are.
 
 ## How tests are organized
 
-Tests are grouped **by test type**, not by feature (see [docs/architecture.md](./docs/architecture.md#why-tests-are-grouped-by-type-not-by-feature) for why). Each folder maps 1:1 to an npm script and a tag:
+Tests are grouped by **the kind of check they do**, not by which feature they belong to. There's more on why in [docs/architecture.md](./docs/architecture.md#why-tests-are-grouped-by-type-not-by-feature). Each folder lines up with one command and one tag:
 
 | Folder | Tag | Command |
 |---|---|---|
@@ -72,48 +78,48 @@ Tests are grouped **by test type**, not by feature (see [docs/architecture.md](.
 | `tests/a11y/` | `@a11y` | `npm run test:a11y` |
 | `tests/mocking/` | `@mocking` | `npm run test:mocking` |
 
-Full conventions (tagging, fixture scope, locator strategy) are in [docs/writing-tests.md](./docs/writing-tests.md). To add a new test, follow [CONTRIBUTING.md](./CONTRIBUTING.md) or run the `.claude/skills/add-test` skill.
+Adding a new test? The full how-to is in [docs/writing-tests.md](./docs/writing-tests.md) and [CONTRIBUTING.md](./CONTRIBUTING.md). There's also an AI skill (`.claude/skills/add-test`) that can scaffold one for you.
 
 ## Running tests
 
-| Command | Runs |
+| Command | What it does |
 |---|---|
-| `npm test` | Everything, all browser projects |
-| `npm run test:ui` | Playwright UI mode (interactive) |
-| `npm run test:headed` | Headed browser |
-| `npm run test:smoke` | Tests tagged `@smoke` |
-| `npm run test:regression` | Tests tagged `@regression` |
-| `npm run test:api` | API tests only |
-| `npm run test:visual` | Visual regression tests |
-| `npm run test:visual:update` | Regenerate visual baselines |
-| `npm run test:a11y` | Accessibility tests |
-| `npm run test:mocking` | Network mocking tests |
-| `npm run report` | Open the last HTML report |
+| `npm test` | Runs everything, in every browser |
+| `npm run test:ui` | Opens Playwright's interactive UI mode |
+| `npm run test:headed` | Runs tests with a visible browser window, instead of hidden in the background |
+| `npm run test:smoke` | Runs only the tests tagged `@smoke` |
+| `npm run test:regression` | Runs only the tests tagged `@regression` |
+| `npm run test:api` | Runs only the API tests |
+| `npm run test:visual` | Runs only the visual (screenshot) tests |
+| `npm run test:visual:update` | Regenerates the saved screenshots the visual tests compare against |
+| `npm run test:a11y` | Runs only the accessibility tests |
+| `npm run test:mocking` | Runs only the network-mocking tests |
+| `npm run report` | Opens the report from the last test run |
 
-## Other scripts
+## Other useful commands
 
-- `npm run lint` / `npm run lint:fix` — ESLint (includes Playwright- and security-specific rules)
-- `npm run format` / `npm run format:check` — Prettier
-- `npm run typecheck` — `tsc --noEmit`
-- `npm run audit` — dependency vulnerability check
+- `npm run lint` / `npm run lint:fix` — checks the code for common mistakes (and fixes what it can automatically)
+- `npm run format` / `npm run format:check` — tidies up code formatting automatically
+- `npm run typecheck` — checks that the TypeScript code is valid, without actually running anything
+- `npm run audit` — checks whether any of our dependencies have known security problems
 
-## Documentation
+## Where to read more
 
-| Doc | Covers |
+| Doc | What's in it |
 |---|---|
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | How to add a page object, API client, test, or skill; pre-PR checklist |
-| [docs/architecture.md](./docs/architecture.md) | Why fixture-based composition, `src/` vs `tests/`, test-type organization, what's deliberately deferred |
-| [docs/writing-tests.md](./docs/writing-tests.md) | Locator strategy, tagging, fixture scope, visual/a11y/mocking conventions |
-| [docs/environments.md](./docs/environments.md) | Layered `.env` config, adding a new target environment |
-| [docs/security.md](./docs/security.md) | Secrets, auth state, synthetic test data, artifact hygiene |
-| [docs/claude-skills.md](./docs/claude-skills.md) | What `.claude/skills/` is, existing skills, how to add a new one |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | How to add a new page, API client, test, or AI skill, and what to check before opening a pull request |
+| [docs/architecture.md](./docs/architecture.md) | Why the project is structured the way it is |
+| [docs/writing-tests.md](./docs/writing-tests.md) | How to find things on a page, tag tests, and write visual/accessibility/mocking tests |
+| [docs/environments.md](./docs/environments.md) | How settings work, and how to point tests at a different environment |
+| [docs/security.md](./docs/security.md) | Rules for keeping secrets and personal data out of the repo |
+| [docs/claude-skills.md](./docs/claude-skills.md) | What the `.claude/skills/` folder is and how to add a new AI skill |
 
 ## Troubleshooting
 
-**`npx playwright install` fails with `ENOTFOUND cdn.playwright.dev` or a timeout.** The environment can't reach Playwright's browser CDN (common in sandboxed/offline/restricted-network setups). Run the install from a machine/network with unrestricted internet access — `npm install` itself doesn't need it, only the browser binary download does.
+**`npx playwright install` fails, with an error like `ENOTFOUND cdn.playwright.dev`, or it times out.** This means your network can't reach the site Playwright downloads browsers from — common on restricted networks, sandboxes, or behind certain proxies. Try again from a network with normal internet access. Note that `npm install` itself doesn't need this connection, only this one extra step does.
 
-**`npm install` prints an `EBADENGINE` warning.** Your Node version is below what the ESLint toolchain expects (see [Prerequisites](#prerequisites)). It's a warning, not a failure — upgrade Node if you also want lint to run without noise.
+**`npm install` prints a warning that says `EBADENGINE`.** This means your installed Node.js version is older than what our tools expect (see [What you need before you start](#what-you-need-before-you-start)). It's just a warning, not a failure — things will still mostly work, but it's worth upgrading Node if you want the warning to go away.
 
-**A visual test fails on first run with "no baseline found."** Expected — there's no committed baseline yet for a new snapshot. Run `npm run test:visual:update` once, review the generated image, then commit it.
+**A visual test fails the first time you run it, saying something like "no baseline found."** This is expected. A "baseline" is the saved reference screenshot a visual test compares against, and none exists yet for a brand new test. Run `npm run test:visual:update` once, look at the image it creates to make sure it's correct, and commit it.
 
-**Fixture callback signature errors (`First argument must use the object destructuring pattern`).** Playwright statically inspects fixture function signatures — the first parameter must be a literal destructuring pattern (`{ page }` or `{}`), even if unused. See `src/fixtures/index.ts` for the `{}` + eslint-disable pattern used when no input fixtures are needed.
+**You see an error like `First argument must use the object destructuring pattern`.** This is a Playwright-specific quirk: it reads your fixture function's first argument directly from the code, so it must be written as `{ page }` or `{}`, even if you don't use it. Look at `src/fixtures/index.ts` for an example of how we handle this.

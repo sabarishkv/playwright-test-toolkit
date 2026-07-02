@@ -1,40 +1,50 @@
 # Contributing
 
+This page walks through how to add the most common things to this project: a new page, a new API client, a new test, or a new AI skill. If you're new here, [docs/architecture.md](./docs/architecture.md) explains *why* things are set up this way, in case any of these steps feel unfamiliar.
+
 ## Adding a new Page Object
 
-1. Create `src/pages/<name>.page.ts`, extending `BasePage`.
-2. Expose locators as getters using `getByRole`/`getByLabel`/`getByTestId` — avoid CSS/XPath selectors (enforced by `eslint-plugin-playwright`).
-3. Add actions as methods (`clickX`, `open`); do not put `expect()` assertions in a Page Object — assertions belong in the test.
-4. Wire it into `src/fixtures/index.ts` as a test-scoped fixture.
-5. Or run the `.claude/skills/add-page-object` skill to scaffold this automatically.
+A "Page Object" is a file that describes one web page: what's on it, and how to interact with it (click this, read that). Tests use it instead of finding elements on the page by hand.
+
+1. Create a new file: `src/pages/<name>.page.ts`, and have it extend `BasePage`.
+2. Add each element you need as a getter, using `getByRole`, `getByLabel`, or `getByTestId` — not CSS selectors or XPath. Our linter will flag those.
+3. Add actions as methods, like `clickX()` or `open()`. Don't put `expect()` checks inside a Page Object — checks belong in the test file, not here.
+4. Register it in `src/fixtures/index.ts` as a fixture (see the next section for what that means), scoped per test.
+5. Or, skip the manual steps and run the `.claude/skills/add-page-object` AI skill to do this for you.
 
 ## Adding a new API client
 
-1. Create `src/api/<resource>.client.ts`, extending `BaseClient`, one method per operation.
-2. If the client has no per-test state, wire it into `src/fixtures/index.ts` as a **worker-scoped** fixture (see `postsClient` for the pattern) rather than recreating it per test.
-3. Or run the `.claude/skills/add-api-client` skill.
+An "API client" is a small file that wraps calls to one part of an API, so tests don't need to know the exact URL or request details.
+
+1. Create a new file: `src/api/<resource>.client.ts`, extending `BaseClient`, with one method per action (like `list()`, `get()`, `create()`).
+2. If the client doesn't need to remember anything between tests (most won't), register it in `src/fixtures/index.ts` as a **worker-scoped** fixture — look at `postsClient` for an example. This means it's created once and reused, instead of being rebuilt for every single test.
+3. Or run the `.claude/skills/add-api-client` AI skill.
 
 ## Adding a new test
 
-1. Pick the right folder: `tests/ui/smoke`, `tests/ui/regression`, `tests/api`, `tests/visual`, `tests/a11y`, or `tests/mocking`.
-2. Tag the `describe` block with the matching tag (`@smoke`, `@regression`, `@api`, `@visual`, `@a11y`, `@mocking`) so it's included in the right npm script.
-3. Import `test`/`expect` from `../../src/fixtures`, not directly from `@playwright/test` — that's what wires in the project's fixtures.
-4. Or run the `.claude/skills/add-test` skill.
+1. Choose the right folder for what you're testing: `tests/ui/smoke`, `tests/ui/regression`, `tests/api`, `tests/visual`, `tests/a11y`, or `tests/mocking`.
+2. Add the matching tag to your `describe` block (`@smoke`, `@regression`, `@api`, `@visual`, `@a11y`, or `@mocking`), so it gets picked up by the right `npm run test:...` command.
+3. Import `test` and `expect` from `../../src/fixtures` — not straight from `@playwright/test`. Importing from our own fixtures file is what gives your test access to things like `homePage` and `postsClient`.
+4. Or run the `.claude/skills/add-test` AI skill.
 
-## Adding a new Claude Code skill
+## Adding a new AI skill
 
-If you find yourself explaining the same scaffolding steps more than once, write it down as a skill instead. See [docs/claude-skills.md](./docs/claude-skills.md) for the `SKILL.md` format and when a new skill is (and isn't) worth adding.
+If you catch yourself explaining the same set of steps more than once, it's worth writing down as a skill instead of relying on memory. See [docs/claude-skills.md](./docs/claude-skills.md) for how skill files are structured, and when adding one is (and isn't) a good idea.
 
-## Fixture scope
+## Fixtures: fresh per test, or shared
 
-- **Test-scoped**: anything derived from `page` (a fresh browser context per test) — e.g. Page Objects.
-- **Worker-scoped**: anything with no per-test state that's expensive or pointless to recreate per test — e.g. an API request context. See `docs/writing-tests.md`.
+A "fixture" is a ready-made object Playwright hands your test automatically. Fixtures come in two flavors:
 
-## Locator strategy
+- **Per test**: a new one is built for every single test. Use this for anything tied to the page itself, like a Page Object.
+- **Per worker**: one is built and reused across every test running in that worker (Playwright runs several tests at once, each in its own "worker"). Use this for things with no state to leak between tests, like a shared API connection. See `docs/writing-tests.md` for more detail.
 
-Prefer, in order: `getByRole` > `getByLabel`/`getByPlaceholder` > `getByTestId` > `getByText`. Avoid CSS/XPath selectors and `nth()` — they break on markup changes and are the first thing `eslint-plugin-playwright` will flag.
+## How to find things on a page
 
-## Before opening a PR
+In order of preference: `getByRole`, then `getByLabel`/`getByPlaceholder`, then `getByTestId`, then `getByText`. Avoid CSS selectors, XPath, and `nth()` (picking "the 3rd item") — they tend to break as soon as the page's design changes, and our linter will flag them.
+
+## Before opening a pull request
+
+Run these three commands and make sure they all pass:
 
 ```bash
 npm run lint
