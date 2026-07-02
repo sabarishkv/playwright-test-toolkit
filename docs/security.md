@@ -1,32 +1,34 @@
 # Security
 
-## Secrets
+A short list of rules to keep this project safe — no secrets leaking, and no real personal data ending up in the repo.
 
-Never hardcode credentials, tokens, or environment-specific URLs in test files, fixtures, or config. Everything comes from `.env`/`.env.<TEST_ENV>` (gitignored), validated by `src/config/env.ts` at startup. `.env.example` is the only env file committed, and must contain placeholder values only.
+## Never put secrets in the code
 
-## Auth/session state
+Don't type passwords, API keys, tokens, or real URLs directly into test files or config. All of that belongs in `.env` files, which are never committed to git. The only file that is committed is `.env.example`, and it should only ever contain fake, placeholder values.
 
-Once real login flows exist, any `storageState.json` produced by an auth fixture must be written to `.auth/` — gitignored in its entirety. Session cookies/tokens must never be committed, even by accident.
+## Login sessions
 
-## Test data
+Later, once this project tests a real app with a login page, saved login sessions (usually a file called `storageState.json`) must be written into a folder called `.auth/`. That folder is never committed to git. A saved login session is just as sensitive as a password — it should never end up in the repo, even by accident.
 
-`src/data/` factories generate synthetic data via `@faker-js/faker`. Never use real user records, emails, or PII as test fixtures — not even "just for local testing."
+## Use fake data only
 
-## Artifacts
+Test data (names, emails, usernames) should always be made up, using the `@faker-js/faker` library in `src/data/`. Never copy a real person's information into a test, even "just for a quick local check."
 
-`playwright-report/`, `test-results/`, and `.auth/` are gitignored. Traces and videos can capture whatever was typed into a page during a run (including into password/PII fields) — if these are ever uploaded as CI artifacts, restrict access rather than making them public by default.
+## Test result files
 
-Visual regression baselines (`*-snapshots/`) are the one exception: they're intentionally committed, since they're the comparison target, not a run artifact.
+Folders like `playwright-report/`, `test-results/`, and `.auth/` are never committed. These can contain recordings of what happened during a test run, including anything typed into the page — like a password. If these files are ever uploaded somewhere (for example, to a CI system), make sure only the right people can access them.
 
-## Dependencies
+The one exception is the saved screenshots used for visual tests (the `*-snapshots/` folders). Those *are* meant to be committed, since they're the reference images we compare against, not leftovers from a test run.
 
-- `package-lock.json` is committed; dependency versions are pinned.
-- `npm run audit` runs `npm audit --audit-level=high` as a deliberate, visible check — not assumed to run silently elsewhere.
+## Keeping dependencies safe
 
-## Lint-level checks
+- `package-lock.json` is committed, so everyone installs the exact same versions of every package.
+- Run `npm run audit` from time to time to check for known security issues in the packages this project depends on.
 
-`eslint-plugin-security` runs across all TypeScript files (unsafe regex, non-literal `require`, etc.), alongside `eslint-plugin-playwright` for framework-specific anti-patterns.
+## Automatic checks
 
-## Network mocking scope
+Our linter (`eslint-plugin-security`) automatically checks the code for risky patterns, like unsafe regular expressions. A second linter (`eslint-plugin-playwright`) checks specifically for test-writing mistakes.
 
-`page.route()` intercepts must be scoped to a specific base URL/path pattern (see `docs/writing-tests.md`), not a broad wildcard — an overly broad mock can silently swallow requests to endpoints you didn't intend to touch, masking real failures.
+## Be careful with faked network responses
+
+When faking ("mocking") a network response in a test, always limit it to the exact URL you mean to fake. A mock that's too broad can accidentally catch requests you didn't intend to fake, which can hide real bugs instead of catching them. See `docs/writing-tests.md` for more on this.

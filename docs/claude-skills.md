@@ -1,54 +1,55 @@
-# Claude Code Skills
+# AI Skills Folder (.claude/skills)
 
-## What lives here
+This project uses Claude Code, an AI coding assistant, to help build and maintain it. `.claude/skills/` is where we keep step-by-step instructions that tell the AI exactly how we like new code written here, so it doesn't have to guess.
 
-`.claude/skills/` holds project-scoped Claude Code skills — markdown instructions that let an AI agent (or a human following along) scaffold new code that matches this project's conventions by construction, instead of relying on someone remembering `CONTRIBUTING.md` every time.
-
-Each skill is a folder containing one `SKILL.md`:
+## What's in this folder today
 
 ```
 .claude/skills/
-├── add-page-object/SKILL.md   # scaffold a new Page Object
-├── add-api-client/SKILL.md    # scaffold a new API client
-└── add-test/SKILL.md          # scaffold a new test in the right folder, with the right tag
+├── add-page-object/SKILL.md   # steps to add a new Page Object
+├── add-api-client/SKILL.md    # steps to add a new API client
+└── add-test/SKILL.md          # steps to add a new test in the right place
 ```
 
-These mirror the three things `CONTRIBUTING.md` documents — the skill is the executable version, the doc is the readable version. Keep both in sync when conventions change.
+These match the same three things explained in `CONTRIBUTING.md`. Think of `CONTRIBUTING.md` as the version a person reads, and these skill files as the version the AI follows. If our conventions change, update both.
 
-## `SKILL.md` format
+## What a skill file looks like
+
+Each skill is a folder with one file inside it, called `SKILL.md`:
 
 ```markdown
 ---
 name: kebab-case-name
-description: One line — what this skill does and when to use it
+description: One line explaining what this skill does and when to use it
 ---
 
-# Human-readable title
+# A short, clear title
 
-Steps, numbered, specific enough that following them produces code
-matching this project's conventions without guessing.
+Numbered steps, written clearly enough that following them produces
+code matching this project's style, without needing to guess.
 ```
 
-- `name` matches the folder name.
-- `description` is what a skill-discovery system matches against — be concrete, not generic ("scaffold a new Page Object" beats "helps with pages").
-- The body is a numbered checklist referencing real files in this repo (e.g. "reference `src/pages/home.page.ts`"), not abstract advice — point at a concrete example every time one exists.
+A few tips:
+- The `name` should match the folder name.
+- The `description` should be specific. "Scaffold a new Page Object" is more useful than "helps with pages," because it's easier to match to the right task.
+- Point to a real, existing file as an example wherever you can (for example, "look at `src/pages/home.page.ts`"). Steps that only describe a pattern in the abstract tend to go out of date faster than steps that point at real, working code.
 
-## Adding a new skill
+## When to add a new skill
 
-Add one when a task in this repo is done often enough, and precisely enough, that writing down the exact steps saves more time than it costs to maintain. Signs it's worth it: you've explained the same steps in a PR review twice, or a new convention (e.g. a new fixture pattern, a new test type folder) needs to be followed consistently by future contributors.
+Add one when you notice you're explaining the same steps more than once, or when a new pattern needs to be followed consistently by everyone (including the AI) going forward.
 
-1. `mkdir .claude/skills/<skill-name>`
-2. Write `.claude/skills/<skill-name>/SKILL.md` following the format above.
-3. Reference at least one real, existing file in this repo as the canonical example — skills that describe patterns abstractly go stale faster than ones that point at working code.
-4. Cross-link it from `CONTRIBUTING.md` (add a line under the relevant section) and from the table in `README.md` if it's broad enough to be a top-level workflow.
-5. Try it — actually invoke it and check the output matches what you'd have written by hand.
+1. Create a new folder: `.claude/skills/<skill-name>`
+2. Write `.claude/skills/<skill-name>/SKILL.md` using the format above.
+3. Point to at least one real example file already in the project.
+4. Add a link to it from `CONTRIBUTING.md`, and from the table in `README.md` if it's a common enough task.
+5. Try it out yourself before trusting it — run it and check the result looks like what you'd have written by hand.
 
-## Don't add a skill for
+## When not to add a skill
 
-- One-off tasks that won't recur.
-- Anything that's just "read this doc" — link the doc instead; a skill should produce or change something, not just restate `docs/writing-tests.md`.
-- Conventions that are still in flux. Stabilize the pattern in code first (one or two real examples), then write the skill once there's something concrete to point at.
+- For something you'll only ever do once. It's not worth writing down.
+- For something that's really just "go read this doc." Link to the doc instead — a skill should help you *build* something, not just repeat information that already exists elsewhere.
+- For a pattern that's still changing. Get it right in the code first, with a real example or two, then write the skill once it's settled.
 
 ## `.mcp.json`
 
-Alongside skills, `.mcp.json` registers Playwright's MCP server, which lets an AI agent drive a real browser directly (inspect the DOM/accessibility tree, try a locator, see it act) while writing new tests — useful during authoring, not something the test suite itself depends on. It's a stub for now since there's no real application to explore yet; revisit once one exists.
+This file lets an AI agent open and control a real web browser directly while it's helping write tests — for example, to check what a button is actually called before writing a locator for it. It doesn't affect how the tests themselves run; it's just a helper for the AI while writing new tests. It's set up but not connected to anything specific yet, since there's no real app to explore.

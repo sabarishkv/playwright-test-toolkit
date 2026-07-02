@@ -1,27 +1,36 @@
 # Environments
 
-## How layering works
+An **environment** here just means "which set of settings (like URLs) the tests should use." You might want to run the same tests against your local machine, a staging server, or a production server — this is how we switch between them.
 
-`src/config/env.ts` loads `.env` first, then `.env.<TEST_ENV>` on top of it (later values override earlier ones). `TEST_ENV` defaults to `local`.
+## How it works
+
+Settings live in `.env` files. When tests start, `src/config/env.ts` does two things:
+
+1. Loads `.env` first.
+2. Then loads `.env.<TEST_ENV>` on top of it, if that file exists, overriding anything that's different.
+
+`TEST_ENV` defaults to `local`. To run against a different environment:
 
 ```bash
 TEST_ENV=staging npm test
 ```
 
-loads `.env`, then applies `.env.staging` overrides. All resulting variables are validated against a `zod` schema at import time — a missing or malformed required variable throws immediately with a clear message, rather than silently becoming `undefined` and failing confusingly mid-test.
+This loads `.env`, then layers `.env.staging` on top of it.
+
+Every setting is checked as soon as the tests start. If something required is missing or wrong, you'll get a clear error message right away, instead of a confusing failure in the middle of a test run.
 
 ## Adding a new environment
 
-1. Create `.env.<name>` (gitignored — never commit real environment values).
-2. Set whatever subset of variables differs from `.env` (you only need to override what's different).
-3. Run with `TEST_ENV=<name>`.
+1. Create a new file named `.env.<name>` (this file should never be committed to git — it's for your machine only).
+2. In it, set only the values that are *different* from `.env`. You don't need to repeat everything.
+3. Run your tests with `TEST_ENV=<name>`.
 
-## Current variables
+## What settings exist today
 
-| Variable | Purpose | Default |
+| Setting | What it's for | Default value |
 |---|---|---|
-| `TEST_ENV` | Selects which `.env.<name>` overlay to load | `local` |
-| `UI_BASE_URL` | Base URL for UI tests / `playwright.config.ts` `use.baseURL` | `https://playwright.dev` |
-| `API_BASE_URL` | Base URL for the API client / mocking tests | `https://jsonplaceholder.typicode.com` |
+| `TEST_ENV` | Which environment file to layer on top | `local` |
+| `UI_BASE_URL` | The website the UI tests open | `https://playwright.dev` |
+| `API_BASE_URL` | The API the API tests and mocks call | `https://jsonplaceholder.typicode.com` |
 
-Update `envSchema` in `src/config/env.ts` whenever a new required variable is introduced, so missing config fails fast instead of surfacing as a confusing runtime error later.
+If you add a new required setting, also add it to `envSchema` in `src/config/env.ts`. That way, a missing value is caught right away instead of causing a confusing error later on.

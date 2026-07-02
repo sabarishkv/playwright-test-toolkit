@@ -61,7 +61,7 @@ If `npx playwright install` fails to download browsers (e.g. restricted network/
 
 ## How tests are organized
 
-Tests are grouped **by test type**, not by feature (see [docs/architecture.md](./docs/architecture.md#why-tests-are-organized-by-test-type-not-by-feature) for why). Each folder maps 1:1 to an npm script and a tag:
+Tests are grouped **by test type**, not by feature (see [docs/architecture.md](./docs/architecture.md#why-tests-are-grouped-by-type-not-by-feature) for why). Each folder maps 1:1 to an npm script and a tag:
 
 | Folder | Tag | Command |
 |---|---|---|
