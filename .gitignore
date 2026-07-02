@@ -22,3 +22,6 @@ npm-debug.log*
 
 # OS
 .DS_Store
+
+# local Claude Code settings (machine/session-specific)
+.claude/settings.local.json
