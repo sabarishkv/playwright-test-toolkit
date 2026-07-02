@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Playwright + TypeScript test framework scaffold (UI, API, visual, accessibility, network mocking)",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "test": "playwright test",
     "test:ui": "playwright test --ui",

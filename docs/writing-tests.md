@@ -1,5 +1,7 @@
 # Writing Tests
 
+For the full folder tree, see [Project structure in the README](../README.md#project-structure). This doc covers the conventions within it.
+
 ## Locator strategy
 
 Prefer, in priority order:

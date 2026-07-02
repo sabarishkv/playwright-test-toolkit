@@ -21,6 +21,10 @@
 3. Import `test`/`expect` from `../../src/fixtures`, not directly from `@playwright/test` — that's what wires in the project's fixtures.
 4. Or run the `.claude/skills/add-test` skill.
 
+## Adding a new Claude Code skill
+
+If you find yourself explaining the same scaffolding steps more than once, write it down as a skill instead. See [docs/claude-skills.md](./docs/claude-skills.md) for the `SKILL.md` format and when a new skill is (and isn't) worth adding.
+
 ## Fixture scope
 
 - **Test-scoped**: anything derived from `page` (a fresh browser context per test) — e.g. Page Objects.
