@@ -1,0 +1,24 @@
+node_modules/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# auth/session state
+.auth/
+
+# playwright artifacts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# build output
+dist/
+
+# logs
+npm-debug.log*
+
+# OS
+.DS_Store
