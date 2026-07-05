@@ -2,7 +2,7 @@
 
 Want to know how to write a test the right way in this project? Start here. For a map of which folder holds which kind of test, see [How the project is laid out in the README](../README.md#how-the-project-is-laid-out).
 
-**In this doc:** [Locators](#how-to-find-things-on-the-page-locators) · [Tags](#labeling-tests-with-tags) · [Fixture scope](#fixtures-fresh-per-test-or-shared) · [No timed waits](#dont-use-timed-waits) · [Visual](#visual-tests-screenshot-comparisons) · [Accessibility](#accessibility-tests) · [Mocking](#faking-network-responses-mocking)
+**In this doc:** [Locators](#how-to-find-things-on-the-page-locators) · [Tags](#labeling-tests-with-tags) · [Fixture scope](#fixtures-fresh-per-test-or-shared) · [No timed waits](#dont-use-timed-waits) · [Visual](#visual-tests-screenshot-comparisons) · [Accessibility](#accessibility-tests) · [Mocking](#faking-network-responses-mocking) · [BDD](#bdd-tests-given-when-then)
 
 ---
 
@@ -32,6 +32,7 @@ Every group of tests (a `test.describe` block) should carry a tag that matches i
 | `tests/visual` | `@visual` | `npm run test:visual` |
 | `tests/a11y` | `@a11y` | `npm run test:a11y` |
 | `tests/mocking` | `@mocking` | `npm run test:mocking` |
+| `tests/bdd` | `@bdd` | `npm run test:bdd` |
 
 A **smoke test** is a quick check that the basics still work. A **regression test** is a deeper check that something which used to work still works after a change.
 
@@ -106,3 +107,66 @@ Use the `checkA11y(page)` fixture in your test — it runs an automated scan and
 Sometimes you want to test how a page behaves when an API call fails or returns something unusual, without actually breaking the real API. Playwright lets you intercept a network request and fake the response — this is called **mocking**.
 
 > **Rule:** always limit the mock to the exact URL you're faking (see `tests/mocking/posts-error-state.spec.ts` for an example). A mock that's too broad can accidentally catch requests you didn't mean to fake, hiding real problems instead of catching them.
+
+---
+
+## BDD tests (Given, When, Then)
+
+**BDD** (Behavior-Driven Development) means writing a test scenario as a short story, in plain English, before writing any code for it: **Given** some starting situation, **When** something happens, **Then** something should be true. This project uses the [playwright-bdd](https://github.com/vitalets/playwright-bdd) library to turn scenarios written this way into real, runnable Playwright tests.
+
+A BDD test has two halves, both under `tests/bdd/`:
+
+- **`features/*.feature`** — the scenario itself, written in a format called **Gherkin**. This is the part meant to be readable by anyone, technical or not.
+- **`steps/*.ts`** — the **step definitions**: regular TypeScript that matches each line of the scenario to real code (open a page, click something, check something).
+
+For example, `tests/bdd/features/get-started.feature` reads:
+
+```gherkin
+Feature: Navigating from the home page to the docs
+
+  @bdd
+  Scenario: Visitor follows the Get started link
+    Given I am on the Playwright home page
+    When I click the Get started link
+    Then I should land on the getting-started docs page
+```
+
+And `tests/bdd/steps/get-started.steps.ts` matches each line to real code, using the exact same fixtures (`homePage`, `page`, and so on) as every other test in this project:
+
+```ts
+import { createBdd } from 'playwright-bdd';
+import { test, expect } from '../../../src/fixtures';
+
+const { Given, When, Then } = createBdd(test);
+
+Given('I am on the Playwright home page', async ({ homePage }) => {
+  await homePage.open();
+});
+
+When('I click the Get started link', async ({ homePage }) => {
+  await homePage.clickGetStarted();
+});
+
+Then('I should land on the getting-started docs page', async ({ page }) => {
+  await expect(page).toHaveURL(/.*intro/);
+});
+```
+
+Here's how a `.feature` file actually turns into a test that runs:
+
+```mermaid
+flowchart LR
+    Feat[".feature file\n(Given/When/Then, plain English)"] --> Gen
+    Steps["step definitions\n(tests/bdd/steps/*.ts)"] --> Gen
+    Gen["npm run test:bdd\n(runs bddgen)"] --> Out["generated test file\n(.features-gen/, gitignored)"]
+    Out --> Run["Playwright runs it\nlike any other test"]
+```
+
+A few things worth knowing:
+
+- Run `npm run test:bdd` to try it — this regenerates the real test files from your `.feature` + step files, then runs them. You don't run `.feature` files directly.
+- The generated files under `.features-gen/` are build output, like `test-results/` or `playwright-report/`. They're gitignored — never edit them by hand, and never commit them.
+- Step definitions import `test` (and `expect`) from `../../../src/fixtures`, the same shared fixtures file every other test type uses. This is what lets a `Given`/`When`/`Then` step use `homePage`, `postsClient`, or anything else defined there.
+- Reuse steps across scenarios where the wording matches exactly — you don't need a new step definition for every scenario, only for new *kinds* of steps.
+
+> **If you see `createBdd() should use 'test' extended from "playwright-bdd"` or `Can't guess test instance`:** something is importing `test` from the wrong place. `src/fixtures/index.ts` must extend `test` from `playwright-bdd` (not `@playwright/test` directly), and `playwright.config.ts`'s `defineBddConfig({ steps: [...] })` must include `src/fixtures/index.ts` in its `steps` pattern so `bddgen` can find it.

@@ -38,8 +38,17 @@ module.exports = tseslint.config(
       '@typescript-eslint/no-require-imports': 'off',
     },
   },
+  {
+    // Step definitions call expect() inside Given/When/Then callbacks, not inside a literal
+    // test() block — playwright-bdd generates the real test() wrapper at build time, so this
+    // rule can't see it statically. The expect() itself still runs inside a real test at runtime.
+    files: ['tests/bdd/steps/**/*.ts'],
+    rules: {
+      'playwright/no-standalone-expect': 'off',
+    },
+  },
   prettier,
   {
-    ignores: ['node_modules', 'playwright-report', 'test-results', 'dist'],
+    ignores: ['node_modules', 'playwright-report', 'test-results', 'dist', '.features-gen'],
   },
 );

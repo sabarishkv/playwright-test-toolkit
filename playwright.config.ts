@@ -1,5 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
+import { defineBddConfig } from 'playwright-bdd';
 import { env } from './src/config/env';
+
+const bddTestDir = defineBddConfig({
+  features: 'tests/bdd/features/**/*.feature',
+  // Including src/fixtures/index.ts lets bddgen auto-detect that step files import
+  // `test` from our shared fixtures, so generated tests use the same fixtures as
+  // every other test type (homePage, postsClient, checkA11y, ...).
+  steps: ['tests/bdd/steps/**/*.ts', 'src/fixtures/index.ts'],
+});
 
 export default defineConfig({
   testDir: './tests',
@@ -22,18 +31,23 @@ export default defineConfig({
       testDir: './tests/api',
     },
     {
+      name: 'bdd',
+      testDir: bddTestDir,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'chromium',
-      testIgnore: '**/api/**',
+      testIgnore: ['**/api/**', '**/bdd/**'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'firefox',
-      testIgnore: '**/api/**',
+      testIgnore: ['**/api/**', '**/bdd/**'],
       use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'webkit',
-      testIgnore: '**/api/**',
+      testIgnore: ['**/api/**', '**/bdd/**'],
       use: { ...devices['Desktop Safari'] },
     },
   ],

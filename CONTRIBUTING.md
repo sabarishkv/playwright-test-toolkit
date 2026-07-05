@@ -2,7 +2,7 @@
 
 This page walks through how to add the most common things to this project: a new page, a new API client, a new test, or a new AI skill. If you're new here, [docs/architecture.md](./docs/architecture.md) explains *why* things are set up this way, in case any of these steps feel unfamiliar.
 
-**Contents:** [Page Object](#adding-a-new-page-object) · [API client](#adding-a-new-api-client) · [Test](#adding-a-new-test) · [AI skill](#adding-a-new-ai-skill) · [Fixture scope](#fixtures-fresh-per-test-or-shared) · [Locators](#how-to-find-things-on-a-page) · [Before a PR](#before-opening-a-pull-request)
+**Contents:** [Page Object](#adding-a-new-page-object) · [API client](#adding-a-new-api-client) · [Test](#adding-a-new-test) · [BDD scenario](#adding-a-new-bdd-scenario) · [AI skill](#adding-a-new-ai-skill) · [Fixture scope](#fixtures-fresh-per-test-or-shared) · [Locators](#how-to-find-things-on-a-page) · [Before a PR](#before-opening-a-pull-request)
 
 ---
 
@@ -30,10 +30,21 @@ An "API client" is a small file that wraps calls to one part of an API, so tests
 
 ## Adding a new test
 
-1. Choose the right folder for what you're testing: `tests/ui/smoke`, `tests/ui/regression`, `tests/api`, `tests/visual`, `tests/a11y`, or `tests/mocking`.
+1. Choose the right folder for what you're testing: `tests/ui/smoke`, `tests/ui/regression`, `tests/api`, `tests/visual`, `tests/a11y`, `tests/mocking`, or `tests/bdd` (see the [next section](#adding-a-new-bdd-scenario) for BDD specifically).
 2. Add the matching tag to your `describe` block (`@smoke`, `@regression`, `@api`, `@visual`, `@a11y`, or `@mocking`), so it gets picked up by the right `npm run test:...` command.
 3. Import `test` and `expect` from `../../src/fixtures` — not straight from `@playwright/test`. Importing from our own fixtures file is what gives your test access to things like `homePage` and `postsClient`.
 4. Or run the `.claude/skills/add-test` AI skill.
+
+---
+
+## Adding a new BDD scenario
+
+BDD (Behavior-Driven Development) scenarios are written in plain-English Given/When/Then steps, using the [playwright-bdd](https://github.com/vitalets/playwright-bdd) library.
+
+1. Add a `.feature` file under `tests/bdd/features/`, describing the scenario in Given/When/Then steps. Tag the scenario `@bdd`.
+2. Add or reuse step definitions under `tests/bdd/steps/`. Each step is a `Given`/`When`/`Then` callback built with `createBdd(test)`, where `test` is imported from `../../../src/fixtures` — the same fixtures every other test uses (`homePage`, `postsClient`, etc.).
+3. Run `npm run test:bdd`. This first regenerates real Playwright test files from your `.feature` + step files (into the gitignored `.features-gen/` folder), then runs them.
+4. See [docs/writing-tests.md](./docs/writing-tests.md#bdd-tests-given-when-then) for more detail, including common errors and what causes them.
 
 ---
 

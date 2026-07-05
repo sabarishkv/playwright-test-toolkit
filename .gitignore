@@ -14,6 +14,9 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 
+# generated from tests/bdd/features + tests/bdd/steps — not hand-written, don't commit
+/.features-gen/
+
 # build output
 dist/
 

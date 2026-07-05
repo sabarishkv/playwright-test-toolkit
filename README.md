@@ -61,7 +61,10 @@ If the browser download in step 2 fails, jump to [Troubleshooting](#troubleshoot
 │   ├── api/                    # tests that call the API directly, no browser needed (tag: @api)
 │   ├── visual/                 # tests that compare screenshots (tag: @visual)
 │   ├── a11y/                   # accessibility checks (tag: @a11y)
-│   └── mocking/                # tests using faked network responses (tag: @mocking)
+│   ├── mocking/                # tests using faked network responses (tag: @mocking)
+│   └── bdd/                    # plain-English Given/When/Then scenarios (tag: @bdd)
+│       ├── features/            # .feature files — the scenarios themselves
+│       └── steps/                # step definitions, wired to the same fixtures as every other test
 ├── docs/                      # deeper explanations — see the table further down
 ├── .env.example                # template for your local settings file
 ├── playwright.config.ts        # main Playwright settings
@@ -89,6 +92,7 @@ Tests are grouped by **the kind of check they do**, not by which feature they be
 | `tests/visual/` | `@visual` | `npm run test:visual` |
 | `tests/a11y/` | `@a11y` | `npm run test:a11y` |
 | `tests/mocking/` | `@mocking` | `npm run test:mocking` |
+| `tests/bdd/` | `@bdd` | `npm run test:bdd` |
 
 Adding a new test? The full how-to is in [docs/writing-tests.md](./docs/writing-tests.md) and [CONTRIBUTING.md](./CONTRIBUTING.md). There's also an AI skill (`.claude/skills/add-test`) that can scaffold one for you.
 
@@ -108,6 +112,7 @@ Adding a new test? The full how-to is in [docs/writing-tests.md](./docs/writing-
 | `npm run test:visual:update` | Regenerates the saved screenshots the visual tests compare against |
 | `npm run test:a11y` | Runs only the accessibility tests |
 | `npm run test:mocking` | Runs only the network-mocking tests |
+| `npm run test:bdd` | Regenerates and runs the BDD (Gherkin) scenarios |
 | `npm run report` | Opens the report from the last test run |
 
 ---
@@ -127,7 +132,7 @@ Adding a new test? The full how-to is in [docs/writing-tests.md](./docs/writing-
 |---|---|
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | How to add a new page, API client, test, or AI skill, and what to check before opening a pull request |
 | [docs/architecture.md](./docs/architecture.md) | Why the project is structured the way it is, with diagrams |
-| [docs/writing-tests.md](./docs/writing-tests.md) | How to find things on a page, tag tests, and write visual/accessibility/mocking tests |
+| [docs/writing-tests.md](./docs/writing-tests.md) | How to find things on a page, tag tests, and write visual/accessibility/mocking/BDD tests |
 | [docs/environments.md](./docs/environments.md) | How settings work, and how to point tests at a different environment |
 | [docs/security.md](./docs/security.md) | Rules for keeping secrets and personal data out of the repo |
 | [docs/claude-skills.md](./docs/claude-skills.md) | What the `.claude/skills/` folder is and how to add a new AI skill |
@@ -147,3 +152,5 @@ This is expected. A "baseline" is the saved reference screenshot a visual test c
 
 **You see an error like `First argument must use the object destructuring pattern`.**
 This is a Playwright-specific quirk: it reads your fixture function's first argument directly from the code, so it must be written as `{ page }` or `{}`, even if you don't use it. Look at `src/fixtures/index.ts` for an example of how we handle this.
+
+**`npx bddgen` (or `npm run test:bdd`) fails with `Can't guess test instance` or `createBdd() should use 'test' extended from "playwright-bdd"`.** This means a BDD step file is importing `test` from somewhere other than `src/fixtures/index.ts`, or `src/fixtures/index.ts` itself stopped extending `playwright-bdd`'s `test`. See [docs/writing-tests.md](./docs/writing-tests.md#bdd-tests-given-when-then) for how the BDD wiring works.

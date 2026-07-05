@@ -1,6 +1,6 @@
 ---
 name: add-test
-description: Scaffold a new UI, API, visual, a11y, or mocking test following this project's conventions (folder, tag, fixture imports)
+description: Scaffold a new UI, API, visual, a11y, mocking, or BDD test following this project's conventions (folder, tag, fixture imports)
 ---
 
 # Add Test
@@ -19,6 +19,7 @@ Use this when asked to add a new test in this project.
    | Visual regression | `tests/visual/` | `@visual` |
    | Accessibility | `tests/a11y/` | `@a11y` |
    | Network mocking | `tests/mocking/` | `@mocking` |
+   | BDD (Gherkin) | `tests/bdd/` | `@bdd` — see below, this one works differently |
 
 2. Import `test`/`expect` from `../../src/fixtures` (adjust relative depth), never directly from `@playwright/test` — this is what wires in the project's Page Objects, API clients, and helpers.
 3. Wrap the test(s) in a `test.describe('<subject> <tag>', ...)` block, with the tag in the describe title so it's picked up by the matching `npm run test:*` script.
@@ -27,3 +28,13 @@ Use this when asked to add a new test in this project.
 6. Run it: `npx playwright test <path-to-new-spec>`.
 
 Reference the existing specs in each folder (e.g. `tests/ui/smoke/home.spec.ts`, `tests/api/posts.spec.ts`) as canonical examples.
+
+## For BDD (Gherkin) tests specifically
+
+BDD tests don't follow steps 2–6 above — they're two separate files instead of one:
+
+1. Add a `.feature` file under `tests/bdd/features/`, with the scenario written in Given/When/Then, tagged `@bdd`.
+2. Add step definitions under `tests/bdd/steps/*.steps.ts`, using `createBdd(test)` where `test` is imported from `../../../src/fixtures` — reuse existing steps where the wording matches exactly, rather than duplicating.
+3. Run `npm run test:bdd` — this regenerates real Playwright test files from the `.feature` + steps (into the gitignored `.features-gen/`) and then runs them. Never edit generated files directly.
+
+Reference `tests/bdd/features/get-started.feature` and `tests/bdd/steps/get-started.steps.ts` as the canonical example, and `docs/writing-tests.md#bdd-tests-given-when-then` for the full explanation.

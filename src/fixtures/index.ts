@@ -1,4 +1,5 @@
-import { test as base, request as pwRequest, APIRequestContext } from '@playwright/test';
+import { request as pwRequest, APIRequestContext } from '@playwright/test';
+import { test as base } from 'playwright-bdd';
 import { HomePage } from '../pages/home.page';
 import { PostsClient } from '../api/posts.client';
 import { env } from '../config/env';
